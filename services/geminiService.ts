@@ -56,6 +56,13 @@ const handleApiResponse = (response: GenerateContentResponse): string => {
 };
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+const apiKey = process.env.GEMINI_API_KEY;
+
+if (!apiKey || apiKey.trim() === '') {
+    throw new Error('GEMINI_API_KEY must be set in .env.local file');
+}
+
+const ai = new GoogleGenAI({ apiKey });
 const model = 'gemini-2.5-flash-image-preview';
 
 export const generateModelImage = async (userImage: File): Promise<string> => {
