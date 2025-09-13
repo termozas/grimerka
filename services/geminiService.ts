@@ -55,7 +55,6 @@ const handleApiResponse = (response: GenerateContentResponse): string => {
     throw new Error(errorMessage);
 };
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
 const apiKey = process.env.GEMINI_API_KEY;
 
 if (!apiKey || apiKey.trim() === '') {
