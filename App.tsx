@@ -123,6 +123,16 @@ const App: React.FC = () => {
     setWardrobe(defaultWardrobe);
   };
 
+  const handleChangeModel = () => {
+    setModelImageUrl(null);
+    setOutfitHistory([]);
+    setCurrentOutfitIndex(0);
+    setIsLoading(false);
+    setLoadingMessage('');
+    setError(null);
+    setCurrentPoseIndex(0);
+    setIsSheetCollapsed(false);
+  };
   const handleGarmentSelect = useCallback(async (garmentFile: File, garmentInfo: WardrobeItem) => {
     if (!displayImageUrl || isLoading) return;
 
@@ -274,6 +284,7 @@ const App: React.FC = () => {
                 <Canvas 
                   displayImageUrl={displayImageUrl}
                   onStartOver={handleStartOver}
+                  onChangeModel={handleChangeModel}
                   isLoading={isLoading}
                   loadingMessage={loadingMessage}
                   onSelectPose={handlePoseSelect}
