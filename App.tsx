@@ -97,6 +97,11 @@ const App: React.FC = () => {
     setIsPaymentModalOpen(true);
   };
 
+  const handleOpenPaymentModal = () => {
+    setPaymentModalReason('');
+    setIsPaymentModalOpen(true);
+  };
+
   const handleModelFinalized = (url: string) => {
     setModelImageUrl(url);
     setOutfitHistory([{
@@ -263,7 +268,7 @@ const App: React.FC = () => {
             exit="exit"
             transition={{ duration: 0.5, ease: 'easeInOut' }}
           >
-            <Header />
+            <Header onOpenPaymentModal={handleOpenPaymentModal} />
             <main className="flex-grow relative flex flex-col md:flex-row overflow-hidden pt-16">
               <div className="w-full h-full flex-grow flex items-center justify-center bg-white pb-16 relative">
                 <Canvas 

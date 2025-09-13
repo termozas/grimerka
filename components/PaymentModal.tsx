@@ -18,12 +18,30 @@ type Plan = 'subscription' | 'topup';
 const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, triggerReason }) => {
     const { addCredits } = useUser();
     const [selectedPlan, setSelectedPlan] = useState<Plan>('subscription');
+    const [promoCode, setPromoCode] = useState('');
+    const [promoError, setPromoError] = useState('');
+    const [promoSuccess, setPromoSuccess] = useState('');
 
     const handlePurchase = (credits: number) => {
         addCredits(credits);
         onClose();
     };
 
+    const handlePromoCode = () => {
+        setPromoError('');
+        setPromoSuccess('');
+        
+        if (promoCode.toLowerCase() === '100credits') {
+            addCredits(100);
+            setPromoSuccess('Promo code applied! 100 credits added.');
+            setPromoCode('');
+            setTimeout(() => {
+                onClose();
+            }, 1500);
+        } else {
+            setPromoError('Invalid promo code. Please try again.');
+        }
+    };
   return (
     <AnimatePresence>
         {isOpen && (
@@ -123,6 +141,33 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, triggerRea
                                 </motion.div>
                             )}
                         </AnimatePresence>
+                        
+                        {/* Promo Code Section */}
+                        <div className="mt-6 pt-4 border-t border-gray-200">
+                            <h3 className="text-sm font-semibold text-gray-900 mb-3">Have a promo code?</h3>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={promoCode}
+                                    onChange={(e) => setPromoCode(e.target.value)}
+                                    placeholder="Enter promo code"
+                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                                />
+                                <button
+                                    onClick={handlePromoCode}
+                                    disabled={!promoCode.trim()}
+                                    className="px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    Apply
+                                </button>
+                            </div>
+                            {promoError && (
+                                <p className="text-red-600 text-xs mt-2">{promoError}</p>
+                            )}
+                            {promoSuccess && (
+                                <p className="text-green-600 text-xs mt-2">{promoSuccess}</p>
+                            )}
+                        </div>
                     </div>
                      <div className="p-4 bg-gray-100/50 text-center text-xs text-gray-500 border-t">
                         This is a demo. No real payment will be processed.
