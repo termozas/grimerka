@@ -55,6 +55,8 @@ const useMediaQuery = (query: string): boolean => {
 const App: React.FC = () => {
   const { user, spendCredits, loading } = useUser();
   const [modelImageUrl, setModelImageUrl] = useState<string | null>(null);
+  const [originalUserImage, setOriginalUserImage] = useState<File | null>(null);
+  const [currentModelStyle, setCurrentModelStyle] = useState<'studio' | 'lifestyle'>('studio');
   const [outfitHistory, setOutfitHistory] = useState<OutfitLayer[]>([]);
   const [currentOutfitIndex, setCurrentOutfitIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -111,8 +113,53 @@ const App: React.FC = () => {
     setCurrentOutfitIndex(0);
   };
 
+  const handleModelFinalized = (url: string, userImage: File, modelStyle: 'studio' | 'lifestyle') => {
+    setModelImageUrl(url);
+    setOriginalUserImage(userImage);
+    setCurrentModelStyle(modelStyle);
+    setOutfitHistory([{
+      garment: null,
+      poseImages: { [POSE_INSTRUCTIONS[0]]: url }
+    }]);
+    setCurrentOutfitIndex(0);
+  };
+
+  const handleToggleModelStyle = useCallback(async () => {
+    if (!originalUserImage || isLoading) return;
+
+    const newStyle = currentModelStyle === 'studio' ? 'lifestyle' : 'studio';
+    
+    if (!spendCredits(1)) {
+      handleRequireCredits(`You need 1 credit to switch to ${newStyle} mode.`);
+      return;
+    }
+
+    setError(null);
+    setIsLoading(true);
+    setLoadingMessage(`Switching to ${newStyle} mode...`);
+
+    try {
+      const newModelUrl = await generateModelImage(originalUserImage, newStyle);
+      setModelImageUrl(newModelUrl);
+      setCurrentModelStyle(newStyle);
+      setOutfitHistory([{
+        garment: null,
+        poseImages: { [POSE_INSTRUCTIONS[0]]: newModelUrl }
+      }]);
+      setCurrentOutfitIndex(0);
+      setCurrentPoseIndex(0);
+    } catch (err) {
+      setError(getFriendlyErrorMessage(err, `Failed to switch to ${newStyle} mode`));
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage('');
+    }
+  }, [originalUserImage, currentModelStyle, isLoading, spendCredits]);
+
   const handleStartOver = () => {
     setModelImageUrl(null);
+    setOriginalUserImage(null);
+    setCurrentModelStyle('studio');
     setOutfitHistory([]);
     setCurrentOutfitIndex(0);
     setIsLoading(false);
@@ -125,6 +172,8 @@ const App: React.FC = () => {
 
   const handleChangeModel = () => {
     setModelImageUrl(null);
+    setOriginalUserImage(null);
+    setCurrentModelStyle('studio');
     setOutfitHistory([]);
     setCurrentOutfitIndex(0);
     setIsLoading(false);
@@ -285,6 +334,8 @@ const App: React.FC = () => {
                   displayImageUrl={displayImageUrl}
                   onStartOver={handleStartOver}
                   onChangeModel={handleChangeModel}
+                  onToggleModelStyle={handleToggleModelStyle}
+                  currentModelStyle={currentModelStyle}
                   isLoading={isLoading}
                   loadingMessage={loadingMessage}
                   onSelectPose={handlePoseSelect}

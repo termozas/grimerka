@@ -13,7 +13,7 @@ import { getFriendlyErrorMessage } from '../lib/utils';
 import { useUser } from './useUser';
 
 interface StartScreenProps {
-  onModelFinalized: (modelUrl: string) => void;
+  onModelFinalized: (modelUrl: string, userImage: File, modelStyle: 'studio' | 'lifestyle') => void;
   onRequireCredits: (reason: string) => void;
 }
 
@@ -49,6 +49,9 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized, onRequireCr
             console.log('Using model style:', currentModelStyle);
             const result = await generateModelImage(file, currentModelStyle);
             setGeneratedModelUrl(result);
+            // Store the file for potential style switching later
+            (window as any).__currentUserImage = file;
+            (window as any).__currentModelStyle = currentModelStyle;
         } catch (err) {
             setError(getFriendlyErrorMessage(err, 'Failed to create model'));
             setUserImageUrl(null);
@@ -206,7 +209,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized, onRequireCr
                     Use Different Photo
                   </button>
                   <button 
-                    onClick={() => onModelFinalized(generatedModelUrl)}
+                    onClick={() => onModelFinalized(generatedModelUrl, (window as any).__currentUserImage, (window as any).__currentModelStyle)}
                     className="w-full sm:w-auto relative inline-flex items-center justify-center px-8 py-3 text-base font-semibold text-white bg-gray-900 rounded-md cursor-pointer group hover:bg-gray-700 transition-colors"
                   >
                     Proceed to Styling &rarr;

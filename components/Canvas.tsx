@@ -11,6 +11,8 @@ interface CanvasProps {
   displayImageUrl: string | null;
   onStartOver: () => void;
   onChangeModel: () => void;
+  onToggleModelStyle: () => void;
+  currentModelStyle: 'studio' | 'lifestyle';
   isLoading: boolean;
   loadingMessage: string;
   onSelectPose: (index: number) => void;
@@ -19,7 +21,7 @@ interface CanvasProps {
   availablePoseKeys: string[];
 }
 
-const Canvas: React.FC<CanvasProps> = ({ displayImageUrl, onStartOver, onChangeModel, isLoading, loadingMessage, onSelectPose, poseInstructions, currentPoseIndex, availablePoseKeys }) => {
+const Canvas: React.FC<CanvasProps> = ({ displayImageUrl, onStartOver, onChangeModel, onToggleModelStyle, currentModelStyle, isLoading, loadingMessage, onSelectPose, poseInstructions, currentPoseIndex, availablePoseKeys }) => {
   const [isPoseMenuOpen, setIsPoseMenuOpen] = useState(false);
   
   const handlePreviousPose = () => {
@@ -74,6 +76,13 @@ const Canvas: React.FC<CanvasProps> = ({ displayImageUrl, onStartOver, onChangeM
     <div className="w-full h-full flex items-center justify-center p-4 relative animate-zoom-in group">
       {/* Start Over Button */}
       <div className="absolute top-4 left-4 z-30 flex flex-col gap-2">
+        <button 
+            onClick={onToggleModelStyle}
+            disabled={isLoading}
+            className="flex items-center justify-center text-center bg-white/60 border border-gray-300/80 text-gray-700 font-semibold py-2 px-4 rounded-full transition-all duration-200 ease-in-out hover:bg-white hover:border-gray-400 active:scale-95 text-sm backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+            Switch to {currentModelStyle === 'studio' ? 'Lifestyle' : 'Studio'}
+        </button>
         <button 
             onClick={onChangeModel}
             className="flex items-center justify-center text-center bg-white/60 border border-gray-300/80 text-gray-700 font-semibold py-2 px-4 rounded-full transition-all duration-200 ease-in-out hover:bg-white hover:border-gray-400 active:scale-95 text-sm backdrop-blur-sm"
