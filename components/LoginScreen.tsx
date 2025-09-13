@@ -133,7 +133,6 @@ const LoginScreen: React.FC = () => {
                 Demo mode gives you 10 free credits without registration
               </p>
             </div>
-            </p>
       </motion.div>
       <Footer />
     </div>
