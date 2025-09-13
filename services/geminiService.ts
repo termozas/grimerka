@@ -60,19 +60,16 @@ const model = 'gemini-2.5-flash-image-preview';
 
 export const generateModelImage = async (userImage: File): Promise<string> => {
     const userImagePart = await fileToPart(userImage);
-    const prompt = "Create a professional model photo of this person with a clean gray background. Keep their appearance but make it look like a fashion photo.";
+    const prompt = "Create a professional model photo of this person with a clean background.";
     
-    const response = await ai.models.generateContent({
+    const response = await ai.generateContent({
         model,
-        contents: [{ parts: [userImagePart, { text: prompt }] }],
-        config: {
-            responseModalities: [Modality.IMAGE, Modality.TEXT],
-            generationConfig: {
-                temperature: 0.4,
-                topK: 32,
-                topP: 1,
-                maxOutputTokens: 4096,
-            },
+        contents: [{ parts: [{ text: prompt }, userImagePart] }],
+        generationConfig: {
+            temperature: 0.4,
+            topK: 32,
+            topP: 1,
+            maxOutputTokens: 4096,
         },
     });
     return handleApiResponse(response);
@@ -81,19 +78,16 @@ export const generateModelImage = async (userImage: File): Promise<string> => {
 export const generateVirtualTryOnImage = async (modelImageUrl: string, garmentImage: File): Promise<string> => {
     const modelImagePart = dataUrlToPart(modelImageUrl);
     const garmentImagePart = await fileToPart(garmentImage);
-    const prompt = `Create a realistic image of the person wearing the new garment. Replace their current clothing with the new item while keeping their pose, face, and background unchanged.`;
+    const prompt = "Show this person wearing the new garment.";
     
-    const response = await ai.models.generateContent({
+    const response = await ai.generateContent({
         model,
-        contents: [{ parts: [modelImagePart, garmentImagePart, { text: prompt }] }],
-        config: {
-            responseModalities: [Modality.IMAGE, Modality.TEXT],
-            generationConfig: {
-                temperature: 0.4,
-                topK: 32,
-                topP: 1,
-                maxOutputTokens: 4096,
-            },
+        contents: [{ parts: [{ text: prompt }, modelImagePart, garmentImagePart] }],
+        generationConfig: {
+            temperature: 0.4,
+            topK: 32,
+            topP: 1,
+            maxOutputTokens: 4096,
         },
     });
     return handleApiResponse(response);
@@ -101,19 +95,16 @@ export const generateVirtualTryOnImage = async (modelImageUrl: string, garmentIm
 
 export const generatePoseVariation = async (tryOnImageUrl: string, poseInstruction: string): Promise<string> => {
     const tryOnImagePart = dataUrlToPart(tryOnImageUrl);
-    const prompt = `Show this person in a new pose: ${poseInstruction}. Keep everything else the same.`;
+    const prompt = `Show this person in a new pose: ${poseInstruction}.`;
     
-    const response = await ai.models.generateContent({
+    const response = await ai.generateContent({
         model,
-        contents: [{ parts: [tryOnImagePart, { text: prompt }] }],
-        config: {
-            responseModalities: [Modality.IMAGE, Modality.TEXT],
-            generationConfig: {
-                temperature: 0.4,
-                topK: 32,
-                topP: 1,
-                maxOutputTokens: 4096,
-            },
+        contents: [{ parts: [{ text: prompt }, tryOnImagePart] }],
+        generationConfig: {
+            temperature: 0.4,
+            topK: 32,
+            topP: 1,
+            maxOutputTokens: 4096,
         },
     });
     return handleApiResponse(response);
