@@ -8,11 +8,27 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co'
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-anon-key'
 
-// Create client with placeholder values if env vars are not set
-// This allows the app to run in demo mode without Supabase connection
 const isConfigured = supabaseUrl !== 'https://placeholder.supabase.co' && supabaseAnonKey !== 'placeholder-anon-key'
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Create mock client for demo mode
+const mockSupabaseClient = {
+  auth: {
+    signUp: async () => ({ data: null, error: { message: 'Demo mode - Supabase not configured' } }),
+    signInWithPassword: async () => ({ data: null, error: { message: 'Demo mode - Supabase not configured' } }),
+    signOut: async () => ({ error: null }),
+    getSession: async () => ({ data: { session: null }, error: null }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } })
+  },
+  from: () => ({
+    select: () => ({ data: [], error: null }),
+    insert: () => ({ data: null, error: null }),
+    update: () => ({ data: null, error: null }),
+    upsert: () => ({ data: null, error: null })
+  })
+}
+
+// Create client conditionally - real client if configured, mock client otherwise
+export const supabase = isConfigured ? createClient(supabaseUrl, supabaseAnonKey) : mockSupabaseClient
 export const isSupabaseConfigured = isConfigured
 
 export type Database = {
