@@ -9,7 +9,7 @@ import StartScreen from './components/StartScreen';
 import Canvas from './components/Canvas';
 import WardrobePanel from './components/WardrobeModal';
 import OutfitStack from './components/OutfitStack';
-import { generateVirtualTryOnImage, generatePoseVariation } from './services/geminiService';
+import { generateVirtualTryOnImage, generatePoseVariation, generateModelImage } from './services/geminiService';
 import { OutfitLayer, WardrobeItem } from './types';
 import { ChevronDownIcon, ChevronUpIcon } from './components/icons';
 import { defaultWardrobe } from './wardrobe';
