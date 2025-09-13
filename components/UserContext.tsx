@@ -114,9 +114,9 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       console.log('Fetching user credits from database...');
       
-      // Add timeout to database operations
+      // Add shorter timeout to database operations
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Database query timeout')), 5000)
+        setTimeout(() => reject(new Error('Database query timeout')), 3000)
       );
       
       let userCredits = { credits: 10 }; // Default fallback
@@ -129,23 +129,30 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           .eq('user_id', authUser.id)
           .single();
           
-        const { data, error } = await Promise.race([dbQuery, timeoutPromise]);
+        const result = await Promise.race([dbQuery, timeoutPromise]);
+        const { data, error } = result;
         
         if (error && error.code === 'PGRST116') {
           console.log('User not found, creating new user with 10 credits');
           // User doesn't exist, create with 10 starting credits
-          const insertQuery = supabase
-            .from('user_credits')
-            .insert([{ user_id: authUser.id, credits: 10 }])
-            .select('credits')
-            .single();
+          try {
+            const insertQuery = supabase
+              .from('user_credits')
+              .insert([{ user_id: authUser.id, credits: 10 }])
+              .select('credits')
+              .single();
+              
+            const insertResult = await Promise.race([insertQuery, timeoutPromise]);
+            const { data: newUserCredits, error: insertError } = insertResult;
             
-          const { data: newUserCredits, error: insertError } = await Promise.race([insertQuery, timeoutPromise]);
-          
-          if (insertError) {
-            console.error('Error creating user credits:', insertError);
-          } else {
-            userCredits = newUserCredits;
+            if (insertError) {
+              console.error('Error creating user credits:', insertError);
+            } else {
+              userCredits = newUserCredits;
+            }
+          } catch (insertErr) {
+            console.error('Insert operation failed:', insertErr);
+            // Use fallback credits
           }
         } else if (error) {
           console.error('Error fetching user credits:', error);
@@ -153,7 +160,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           userCredits = data;
         }
       } catch (dbError) {
-        console.error('Database operation failed or timed out:', dbError);
+        console.warn('Database operation failed or timed out, using fallback credits:', dbError);
         // Continue with fallback credits
       }
 
@@ -166,6 +173,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
     } catch (err) {
       console.error('Error handling auth user:', err);
+      // Always set user even if there are errors
       setUser({
         isLoggedIn: true,
         id: authUser.id,
