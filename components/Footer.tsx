@@ -33,7 +33,6 @@ const Footer: React.FC<FooterProps> = ({ isOnDressingScreen = false }) => {
     <footer className={`fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-200/60 p-3 z-50 ${isOnDressingScreen ? 'hidden sm:block' : ''}`}>
       <div className="mx-auto flex flex-col sm:flex-row items-center justify-between text-xs text-gray-600 max-w-7xl px-4">
         <p>
-          Created by{' '}
           <a 
             href="https://x.com/grimerka" 
             target="_blank" 
