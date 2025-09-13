@@ -122,7 +122,12 @@ const App: React.FC = () => {
     const userImageToUse = originalUserImage || (window as any).__originalUserImage;
     
     if (!userImageToUse || isLoading) {
-      console.error('Cannot toggle model style:', { userImageToUse: !!userImageToUse, isLoading });
+      console.error('Cannot toggle model style:', { 
+        hasUserImage: !!userImageToUse, 
+        isLoading,
+        originalUserImage: !!originalUserImage,
+        globalUserImage: !!(window as any).__originalUserImage
+      });
       return;
     }
 
@@ -133,7 +138,11 @@ const App: React.FC = () => {
       return;
     }
 
-    console.log('Toggling model style to:', newStyle, 'with image:', userImageToUse.name);
+    console.log('Toggling model style to:', newStyle, 'with image:', {
+      name: userImageToUse.name,
+      size: userImageToUse.size,
+      type: userImageToUse.type
+    });
     
     setError(null);
     setIsLoading(true);
@@ -141,7 +150,7 @@ const App: React.FC = () => {
 
     try {
       const newModelUrl = await generateModelImage(userImageToUse, newStyle);
-      console.log('Successfully generated new model URL');
+      console.log('Successfully generated new model URL:', newModelUrl ? 'URL received' : 'No URL');
       setModelImageUrl(newModelUrl);
       setCurrentModelStyle(newStyle);
       setOriginalUserImage(userImageToUse);
@@ -152,7 +161,11 @@ const App: React.FC = () => {
       setCurrentOutfitIndex(0);
       setCurrentPoseIndex(0);
     } catch (err) {
-      console.error('Error in handleToggleModelStyle:', err);
+      console.error('Error in handleToggleModelStyle:', {
+        error: err,
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined
+      });
       setError(getFriendlyErrorMessage(err, `Failed to switch to ${newStyle} mode`));
     } finally {
       setIsLoading(false);

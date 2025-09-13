@@ -59,6 +59,13 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
 const model = 'gemini-2.5-flash-image-preview';
 
 export const generateModelImage = async (userImage: File, modelStyle: 'studio' | 'lifestyle' = 'studio'): Promise<string> => {
+    console.log('generateModelImage called with:', {
+        fileName: userImage.name,
+        fileSize: userImage.size,
+        fileType: userImage.type,
+        modelStyle
+    });
+    
     const userImagePart = await fileToPart(userImage);
     
     const studioPrompt = "You are an expert fashion photographer AI. Transform the person in this image into a full-body fashion model photo suitable for an e-commerce website. The background must be a clean, neutral studio backdrop (light gray, #f0f0f0). The person should have a neutral, professional model expression. Preserve the person's identity, unique features, and body type, but place them in a standard, relaxed standing model pose. The final image must be photorealistic. Return ONLY the final image.";
@@ -71,14 +78,28 @@ export const generateModelImage = async (userImage: File, modelStyle: 'studio' |
     console.log('Model style selected:', modelStyle);
     console.log('Prompt being sent:', prompt.substring(0, 100) + '...');
     
-    const response = await ai.models.generateContent({
-        model,
-        contents: { parts: [userImagePart, { text: prompt }] },
-        config: {
-            responseModalities: [Modality.IMAGE, Modality.TEXT],
-        },
-    });
-    return handleApiResponse(response);
+    try {
+        const response = await ai.models.generateContent({
+            model,
+            contents: { parts: [userImagePart, { text: prompt }] },
+            config: {
+                responseModalities: [Modality.IMAGE, Modality.TEXT],
+            },
+        });
+        console.log('API response received:', {
+            hasCandidates: !!(response.candidates && response.candidates.length > 0),
+            promptFeedback: response.promptFeedback,
+            finishReason: response.candidates?.[0]?.finishReason
+        });
+        return handleApiResponse(response);
+    } catch (error) {
+        console.error('API call failed:', {
+            error,
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined
+        });
+        throw error;
+    }
 };
 
 export const generateVirtualTryOnImage = async (modelImageUrl: string, garmentImage: File): Promise<string> => {
