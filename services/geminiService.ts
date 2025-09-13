@@ -67,6 +67,10 @@ export const generateModelImage = async (userImage: File, modelStyle: 'studio' |
     
     const prompt = modelStyle === 'studio' ? studioPrompt : lifestylePrompt;
     
+    // Debug: Log which prompt is being used
+    console.log('Model style selected:', modelStyle);
+    console.log('Prompt being sent:', prompt.substring(0, 100) + '...');
+    
     const response = await ai.models.generateContent({
         model,
         contents: { parts: [userImagePart, { text: prompt }] },
