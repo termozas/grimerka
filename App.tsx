@@ -116,7 +116,10 @@ const App: React.FC = () => {
   };
 
   const handleToggleModelStyle = useCallback(async () => {
-    if (!originalUserImage || isLoading) return;
+    if (!originalUserImage || isLoading) {
+      console.error('Cannot toggle model style:', { originalUserImage: !!originalUserImage, isLoading });
+      return;
+    }
 
     const newStyle = currentModelStyle === 'studio' ? 'lifestyle' : 'studio';
     
@@ -125,12 +128,15 @@ const App: React.FC = () => {
       return;
     }
 
+    console.log('Toggling model style to:', newStyle, 'with image:', originalUserImage.name);
+    
     setError(null);
     setIsLoading(true);
     setLoadingMessage(`Switching to ${newStyle} mode...`);
 
     try {
       const newModelUrl = await generateModelImage(originalUserImage, newStyle);
+      console.log('Successfully generated new model URL');
       setModelImageUrl(newModelUrl);
       setCurrentModelStyle(newStyle);
       setOutfitHistory([{
@@ -140,6 +146,7 @@ const App: React.FC = () => {
       setCurrentOutfitIndex(0);
       setCurrentPoseIndex(0);
     } catch (err) {
+      console.error('Error in handleToggleModelStyle:', err);
       setError(getFriendlyErrorMessage(err, `Failed to switch to ${newStyle} mode`));
     } finally {
       setIsLoading(false);
