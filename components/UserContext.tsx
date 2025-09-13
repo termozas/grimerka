@@ -37,13 +37,16 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Initialize auth state
   useEffect(() => {
     const initializeAuth = async () => {
+      console.log('Starting auth initialization...');
       try {
         // Check if Supabase is configured
         if (!isSupabaseConfigured) {
+          console.log('Supabase not configured, using demo mode');
           setLoading(false);
           return;
         }
 
+        console.log('Supabase configured, getting session...');
         // Get initial session
         const { data: { session }, error } = await supabase.auth.getSession();
         
@@ -53,6 +56,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           return;
         }
 
+        console.log('Session result:', session ? 'Found session' : 'No session');
         if (session?.user) {
           await handleAuthUser(session.user);
         } else {
@@ -66,21 +70,14 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     initializeAuth();
 
-    // Get initial session
-    // supabase.auth.getSession().then(({ data: { session } }) => {
-    //   if (session?.user) {
-    //     handleAuthUser(session.user);
-    //   } else {
-    //     setLoading(false);
-    //   }
-    // });
-
     // Listen for auth changes
     let subscription: { unsubscribe: () => void } | null = null;
     
     if (isSupabaseConfigured) {
+      console.log('Setting up auth state listener...');
       const { data } = supabase.auth.onAuthStateChange(
         async (event, session) => {
+          console.log('Auth state changed:', event, session ? 'with session' : 'no session');
           if (session?.user) {
             await handleAuthUser(session.user);
           } else {
@@ -100,9 +97,11 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const handleAuthUser = async (authUser: SupabaseUser) => {
+    console.log('Handling auth user:', authUser.email);
     try {
       // Check if Supabase is properly configured
       if (!isSupabaseConfigured) {
+        console.log('Setting demo user');
         setUser({
           isLoggedIn: true,
           id: authUser.id,
@@ -113,6 +112,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return;
       }
 
+      console.log('Fetching user credits from database...');
       // Get or create user credits
       let { data: userCredits, error } = await supabase
         .from('user_credits')
@@ -121,6 +121,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .single();
 
       if (error && error.code === 'PGRST116') {
+        console.log('User not found, creating new user with 10 credits');
         // User doesn't exist, create with 10 starting credits
         const { data: newUserCredits, error: insertError } = await supabase
           .from('user_credits')
@@ -139,6 +140,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         userCredits = { credits: 10 }; // Fallback
       }
 
+      console.log('Setting user with credits:', userCredits?.credits);
       setUser({
         isLoggedIn: true,
         id: authUser.id,
@@ -154,6 +156,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         credits: 10, // Fallback
       });
     } finally {
+      console.log('Auth initialization complete, setting loading to false');
       setLoading(false);
     }
   };
