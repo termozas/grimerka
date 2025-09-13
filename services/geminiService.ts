@@ -58,9 +58,15 @@ const handleApiResponse = (response: GenerateContentResponse): string => {
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
 const model = 'gemini-2.5-flash-image-preview';
 
-export const generateModelImage = async (userImage: File): Promise<string> => {
+export const generateModelImage = async (userImage: File, modelStyle: 'studio' | 'lifestyle' = 'studio'): Promise<string> => {
     const userImagePart = await fileToPart(userImage);
-    const prompt = "You are an expert fashion photographer AI. Transform the person in this image into a full-body fashion model photo suitable for an e-commerce website. The background must be a clean, neutral studio backdrop (light gray, #f0f0f0). The person should have a neutral, professional model expression. Preserve the person's identity, unique features, and body type, but place them in a standard, relaxed standing model pose. The final image must be photorealistic. Return ONLY the final image.";
+    
+    const studioPrompt = "You are an expert fashion photographer AI. Transform the person in this image into a full-body fashion model photo suitable for an e-commerce website. The background must be a clean, neutral studio backdrop (light gray, #f0f0f0). The person should have a neutral, professional model expression. Preserve the person's identity, unique features, and body type, but place them in a standard, relaxed standing model pose. The final image must be photorealistic. Return ONLY the final image.";
+    
+    const lifestylePrompt = "You are an expert fashion photographer AI. Transform the person in this image into a full-body fashion model photo with a realistic, natural-looking lifestyle setting (e.g., urban street, park, cafe, home interior). The person should have a natural, relaxed expression and be interacting naturally with the environment. Preserve the person's identity, unique features, and body type, but place them in a natural, lifestyle pose that fits the setting. The final image must be photorealistic. Return ONLY the final image.";
+    
+    const prompt = modelStyle === 'studio' ? studioPrompt : lifestylePrompt;
+    
     const response = await ai.models.generateContent({
         model,
         contents: { parts: [userImagePart, { text: prompt }] },

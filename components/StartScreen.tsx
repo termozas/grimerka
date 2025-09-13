@@ -22,6 +22,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized, onRequireCr
   const [generatedModelUrl, setGeneratedModelUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedModelStyle, setSelectedModelStyle] = useState<'studio' | 'lifestyle'>('studio');
   const { spendCredits } = useUser();
 
   const handleFileSelect = useCallback(async (file: File) => {
@@ -43,7 +44,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized, onRequireCr
         setGeneratedModelUrl(null);
         setError(null);
         try {
-            const result = await generateModelImage(file);
+            const result = await generateModelImage(file, selectedModelStyle);
             setGeneratedModelUrl(result);
         } catch (err) {
             setError(getFriendlyErrorMessage(err, 'Failed to create model'));
@@ -66,6 +67,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized, onRequireCr
     setGeneratedModelUrl(null);
     setIsGenerating(false);
     setError(null);
+    setSelectedModelStyle('studio');
   };
 
   const screenVariants = {
@@ -95,6 +97,40 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized, onRequireCr
                 Ever wondered how an outfit would look on you? Stop guessing. Upload a photo and see for yourself. Our AI creates your personal model, ready to try on anything.
               </p>
               <hr className="my-8 border-gray-200" />
+              
+              {/* Model Style Selection */}
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Choose your style:</h3>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setSelectedModelStyle('studio')}
+                    className={`flex-1 px-4 py-3 text-sm font-medium rounded-lg border transition-all ${
+                      selectedModelStyle === 'studio'
+                        ? 'bg-gray-900 text-white border-gray-900'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <div className="text-center">
+                      <div className="font-semibold">Studio Style</div>
+                      <div className="text-xs opacity-75 mt-1">Clean, professional backdrop</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setSelectedModelStyle('lifestyle')}
+                    className={`flex-1 px-4 py-3 text-sm font-medium rounded-lg border transition-all ${
+                      selectedModelStyle === 'lifestyle'
+                        ? 'bg-gray-900 text-white border-gray-900'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <div className="text-center">
+                      <div className="font-semibold">Lifestyle</div>
+                      <div className="text-xs opacity-75 mt-1">Natural, real-world setting</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+              
               <div className="flex flex-col items-center lg:items-start w-full gap-3">
                 <label htmlFor="image-upload-start" className="w-full relative flex items-center justify-center px-8 py-3 text-base font-semibold text-white bg-gray-900 rounded-md cursor-pointer group hover:bg-gray-700 transition-colors">
                   <UploadCloudIcon className="w-5 h-5 mr-3" />
