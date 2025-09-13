@@ -104,15 +104,6 @@ const App: React.FC = () => {
     setIsPaymentModalOpen(true);
   };
 
-  const handleModelFinalized = (url: string) => {
-    setModelImageUrl(url);
-    setOutfitHistory([{
-      garment: null,
-      poseImages: { [POSE_INSTRUCTIONS[0]]: url }
-    }]);
-    setCurrentOutfitIndex(0);
-  };
-
   const handleModelFinalized = (url: string, userImage: File, modelStyle: 'studio' | 'lifestyle') => {
     setModelImageUrl(url);
     setOriginalUserImage(userImage);
