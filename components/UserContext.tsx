@@ -4,7 +4,7 @@
 */
 import React, { createContext, useState, ReactNode, useCallback } from 'react';
 import { User as SupabaseUser } from '@supabase/supabase-js'
-import { supabase } from '../lib/supabase'
+import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import { useEffect } from 'react'
 
 interface User {
