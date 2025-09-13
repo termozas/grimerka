@@ -60,16 +60,12 @@ const model = 'gemini-2.5-flash-image-preview';
 
 export const generateModelImage = async (userImage: File): Promise<string> => {
     const userImagePart = await fileToPart(userImage);
-    const prompt = "Create a professional model photo of this person with a clean background.";
-    
-    const response = await ai.generateContent({
+    const prompt = "You are an expert fashion photographer AI. Transform the person in this image into a full-body fashion model photo suitable for an e-commerce website. The background must be a clean, neutral studio backdrop (light gray, #f0f0f0). The person should have a neutral, professional model expression. Preserve the person's identity, unique features, and body type, but place them in a standard, relaxed standing model pose. The final image must be photorealistic. Return ONLY the final image.";
+    const response = await ai.models.generateContent({
         model,
-        contents: [{ parts: [{ text: prompt }, userImagePart] }],
-        generationConfig: {
-            temperature: 0.4,
-            topK: 32,
-            topP: 1,
-            maxOutputTokens: 4096,
+        contents: { parts: [userImagePart, { text: prompt }] },
+        config: {
+            responseModalities: [Modality.IMAGE, Modality.TEXT],
         },
     });
     return handleApiResponse(response);
@@ -78,16 +74,19 @@ export const generateModelImage = async (userImage: File): Promise<string> => {
 export const generateVirtualTryOnImage = async (modelImageUrl: string, garmentImage: File): Promise<string> => {
     const modelImagePart = dataUrlToPart(modelImageUrl);
     const garmentImagePart = await fileToPart(garmentImage);
-    const prompt = "Show this person wearing the new garment.";
-    
-    const response = await ai.generateContent({
+    const prompt = `You are an expert virtual try-on AI. You will be given a 'model image' and a 'garment image'. Your task is to create a new photorealistic image where the person from the 'model image' is wearing the clothing from the 'garment image'.
+
+**Crucial Rules:**
+1.  **Complete Garment Replacement:** You MUST completely REMOVE and REPLACE the clothing item worn by the person in the 'model image' with the new garment. No part of the original clothing (e.g., collars, sleeves, patterns) should be visible in the final image.
+2.  **Preserve the Model:** The person's face, hair, body shape, and pose from the 'model image' MUST remain unchanged.
+3.  **Preserve the Background:** The entire background from the 'model image' MUST be preserved perfectly.
+4.  **Apply the Garment:** Realistically fit the new garment onto the person. It should adapt to their pose with natural folds, shadows, and lighting consistent with the original scene.
+5.  **Output:** Return ONLY the final, edited image. Do not include any text.`;
+    const response = await ai.models.generateContent({
         model,
-        contents: [{ parts: [{ text: prompt }, modelImagePart, garmentImagePart] }],
-        generationConfig: {
-            temperature: 0.4,
-            topK: 32,
-            topP: 1,
-            maxOutputTokens: 4096,
+        contents: { parts: [modelImagePart, garmentImagePart, { text: prompt }] },
+        config: {
+            responseModalities: [Modality.IMAGE, Modality.TEXT],
         },
     });
     return handleApiResponse(response);
@@ -95,16 +94,12 @@ export const generateVirtualTryOnImage = async (modelImageUrl: string, garmentIm
 
 export const generatePoseVariation = async (tryOnImageUrl: string, poseInstruction: string): Promise<string> => {
     const tryOnImagePart = dataUrlToPart(tryOnImageUrl);
-    const prompt = `Show this person in a new pose: ${poseInstruction}.`;
-    
-    const response = await ai.generateContent({
+    const prompt = `You are an expert fashion photographer AI. Take this image and regenerate it from a different perspective. The person, clothing, and background style must remain identical. The new perspective should be: "${poseInstruction}". Return ONLY the final image.`;
+    const response = await ai.models.generateContent({
         model,
-        contents: [{ parts: [{ text: prompt }, tryOnImagePart] }],
-        generationConfig: {
-            temperature: 0.4,
-            topK: 32,
-            topP: 1,
-            maxOutputTokens: 4096,
+        contents: { parts: [tryOnImagePart, { text: prompt }] },
+        config: {
+            responseModalities: [Modality.IMAGE, Modality.TEXT],
         },
     });
     return handleApiResponse(response);
