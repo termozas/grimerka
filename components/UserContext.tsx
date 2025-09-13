@@ -36,32 +36,83 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Initialize auth state
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        handleAuthUser(session.user);
-      } else {
-        setLoading(false);
-      }
-    });
+    const initializeAuth = async () => {
+      try {
+        // Check if Supabase is configured
+        if (!isSupabaseConfigured) {
+          setLoading(false);
+          return;
+        }
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+        // Get initial session
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+          setLoading(false);
+          return;
+        }
+
         if (session?.user) {
           await handleAuthUser(session.user);
         } else {
-          setUser({ isLoggedIn: false, credits: 0 });
           setLoading(false);
         }
+      } catch (err) {
+        console.error('Error initializing auth:', err);
+        setLoading(false);
       }
-    );
+    };
 
-    return () => subscription.unsubscribe();
+    initializeAuth();
+
+    // Get initial session
+    // supabase.auth.getSession().then(({ data: { session } }) => {
+    //   if (session?.user) {
+    //     handleAuthUser(session.user);
+    //   } else {
+    //     setLoading(false);
+    //   }
+    // });
+
+    // Listen for auth changes
+    let subscription: { unsubscribe: () => void } | null = null;
+    
+    if (isSupabaseConfigured) {
+      const { data } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          if (session?.user) {
+            await handleAuthUser(session.user);
+          } else {
+            setUser({ isLoggedIn: false, credits: 0 });
+            setLoading(false);
+          }
+        }
+      );
+      subscription = data;
+    }
+
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
   }, []);
 
   const handleAuthUser = async (authUser: SupabaseUser) => {
     try {
+      // Check if Supabase is properly configured
+      if (!isSupabaseConfigured) {
+        setUser({
+          isLoggedIn: true,
+          id: authUser.id,
+          email: authUser.email,
+          credits: 10,
+        });
+        setLoading(false);
+        return;
+      }
+
       // Get or create user credits
       let { data: userCredits, error } = await supabase
         .from('user_credits')

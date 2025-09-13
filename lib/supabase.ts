@@ -5,10 +5,10 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-anon-key'
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-const isConfigured = supabaseUrl !== 'https://placeholder.supabase.co' && supabaseAnonKey !== 'placeholder-anon-key'
+const isConfigured = supabaseUrl && supabaseAnonKey && supabaseUrl.startsWith('http')
 
 // Create mock client for demo mode
 const mockSupabaseClient = {
@@ -17,7 +17,7 @@ const mockSupabaseClient = {
     signInWithPassword: async () => ({ data: null, error: { message: 'Demo mode - Supabase not configured' } }),
     signOut: async () => ({ error: null }),
     getSession: async () => ({ data: { session: null }, error: null }),
-    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } })
+    onAuthStateChange: () => ({ data: { unsubscribe: () => {} } })
   },
   from: () => ({
     select: () => ({ data: [], error: null }),
