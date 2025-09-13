@@ -53,7 +53,7 @@ const useMediaQuery = (query: string): boolean => {
 
 
 const App: React.FC = () => {
-  const { user, spendCredits } = useUser();
+  const { user, spendCredits, loading } = useUser();
   const [modelImageUrl, setModelImageUrl] = useState<string | null>(null);
   const [outfitHistory, setOutfitHistory] = useState<OutfitLayer[]>([]);
   const [currentOutfitIndex, setCurrentOutfitIndex] = useState(0);
@@ -222,6 +222,17 @@ const App: React.FC = () => {
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -15 },
   };
+
+  if (loading) {
+    return (
+      <div className="w-screen h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin h-10 w-10 border-4 border-gray-300 border-t-gray-900 rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user.isLoggedIn) {
     return <LoginScreen />;
