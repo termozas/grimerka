@@ -108,6 +108,8 @@ const App: React.FC = () => {
     setModelImageUrl(url);
     setOriginalUserImage(userImage);
     setCurrentModelStyle(modelStyle);
+    // Store the original user image globally for style switching
+    (window as any).__originalUserImage = userImage;
     setOutfitHistory([{
       garment: null,
       poseImages: { [POSE_INSTRUCTIONS[0]]: url }
@@ -116,8 +118,11 @@ const App: React.FC = () => {
   };
 
   const handleToggleModelStyle = useCallback(async () => {
-    if (!originalUserImage || isLoading) {
-      console.error('Cannot toggle model style:', { originalUserImage: !!originalUserImage, isLoading });
+    // Use the stored original user image
+    const userImageToUse = originalUserImage || (window as any).__originalUserImage;
+    
+    if (!userImageToUse || isLoading) {
+      console.error('Cannot toggle model style:', { userImageToUse: !!userImageToUse, isLoading });
       return;
     }
 
@@ -128,17 +133,18 @@ const App: React.FC = () => {
       return;
     }
 
-    console.log('Toggling model style to:', newStyle, 'with image:', originalUserImage.name);
+    console.log('Toggling model style to:', newStyle, 'with image:', userImageToUse.name);
     
     setError(null);
     setIsLoading(true);
     setLoadingMessage(`Switching to ${newStyle} mode...`);
 
     try {
-      const newModelUrl = await generateModelImage(originalUserImage, newStyle);
+      const newModelUrl = await generateModelImage(userImageToUse, newStyle);
       console.log('Successfully generated new model URL');
       setModelImageUrl(newModelUrl);
       setCurrentModelStyle(newStyle);
+      setOriginalUserImage(userImageToUse);
       setOutfitHistory([{
         garment: null,
         poseImages: { [POSE_INSTRUCTIONS[0]]: newModelUrl }
