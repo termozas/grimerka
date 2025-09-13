@@ -44,7 +44,10 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized, onRequireCr
         setGeneratedModelUrl(null);
         setError(null);
         try {
-            const result = await generateModelImage(file, selectedModelStyle);
+            // Get the current value of selectedModelStyle at the time of execution
+            const currentModelStyle = selectedModelStyle;
+            console.log('Using model style:', currentModelStyle);
+            const result = await generateModelImage(file, currentModelStyle);
             setGeneratedModelUrl(result);
         } catch (err) {
             setError(getFriendlyErrorMessage(err, 'Failed to create model'));
@@ -54,7 +57,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized, onRequireCr
         }
     };
     reader.readAsDataURL(file);
-  }, [spendCredits, onRequireCredits]);
+  }, [spendCredits, onRequireCredits, selectedModelStyle]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
